@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useState, FormEvent } from 'react';
-import Link from 'next/link';
-import Input from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
-import { SignupFormData, FormErrors } from '@/types/auth';
+import { useState, FormEvent } from "react";
+import Link from "next/link";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+import { SignupFormData, FormErrors } from "@/types/auth";
 import {
   validateEmail,
   validatePassword,
   validateConfirmPassword,
-} from '@/lib/validation';
+} from "@/lib/validation";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState<SignupFormData>({
-    email: '',
-    password: '',
-    confirmPassword: '',
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -59,19 +59,25 @@ export default function SignupPage() {
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    console.log('Signup data:', {
-      email: formData.email,
-      password: formData.password,
+    const res = await fetch("http://localhost:3001/users/signup", {
+      method: "POST",
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
+    if (!res.ok) {
+      alert(res.statusText);
 
-    // Simulate network delay
-    setTimeout(() => {
-      setIsSubmitting(false);
-      alert(
-        'Account created successfully! (This is a demo - check console for form data)'
-      );
-    }, 1000);
+      return null;
+    }
+    const response = await res.json();
+    alert("user registered!");
+
+    console.log(response);
   };
 
   return (
@@ -146,13 +152,13 @@ export default function SignupPage() {
             />
 
             <Button type="submit" disabled={isSubmitting} fullWidth>
-              {isSubmitting ? 'Creating account...' : 'Sign Up'}
+              {isSubmitting ? "Creating account..." : "Sign Up"}
             </Button>
           </form>
 
           <div className="text-center">
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Already have an account?{' '}
+              Already have an account?{" "}
               <Link
                 href="/login"
                 className="text-blue-600 dark:text-blue-400 hover:underline font-medium"

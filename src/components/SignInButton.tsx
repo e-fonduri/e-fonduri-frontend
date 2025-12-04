@@ -29,7 +29,7 @@ const SignInButton = () => {
         Sign in
       </Link>
       <Link
-        href={"/signin"}
+        href={"/signup"}
         className="flex gap-4 ml-auto text-gren-200 bg-green-600"
       >
         Sign up
