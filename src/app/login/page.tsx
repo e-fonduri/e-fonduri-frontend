@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -8,6 +10,7 @@ import { LoginFormData, FormErrors } from '@/types/auth';
 import { validateEmail, validatePassword } from '@/lib/validation';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
@@ -42,14 +45,27 @@ export default function LoginPage() {
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    console.log('Login data:', formData);
+    try {
+      const result = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
 
-    // Simulate network delay
-    setTimeout(() => {
+      if (result?.error) {
+        alert('Login failed: ' + result.error);
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (result?.ok) {
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('An error occurred during login');
       setIsSubmitting(false);
-      alert('Login successful! (This is a demo - check console for form data)');
-    }, 1000);
+    }
   };
 
   return (

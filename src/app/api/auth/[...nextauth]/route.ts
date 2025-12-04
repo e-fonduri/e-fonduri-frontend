@@ -12,6 +12,7 @@ async function refreshToken(token: JWT): Promise<JWT> {
 
   if (!res.ok) {
     console.log("Refresh token expired or invalid - logging out");
+    throw new Error("Refresh token expired or invalid");
   }
 
   console.log("refreshed");

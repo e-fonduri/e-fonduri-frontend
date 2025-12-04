@@ -23,7 +23,7 @@ const SignInButton = () => {
   return (
     <div className="flex gap-4 ml-auto">
       <Link
-        href={"/api/auth/signin"}
+        href={"/login"}
         className="flex gap-4 ml-auto text-gren-200 bg-green-600"
       >
         Sign in
