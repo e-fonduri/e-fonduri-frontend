@@ -12,3 +12,7 @@ export interface LoginFormData {
 export interface SignupFormData extends LoginFormData {
   confirmPassword: string;
 }
+
+export interface User {
+  email: string;
+}

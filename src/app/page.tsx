@@ -1,5 +1,3 @@
-import Button from '@/components/ui/Button';
-
 export default function Home() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-zinc-900 dark:to-zinc-800 p-4">
@@ -12,15 +10,6 @@ export default function Home() {
             <p className="text-lg text-zinc-600 dark:text-zinc-400">
               Your platform for managing funds and resources
             </p>
-          </div>
-
-          <div className="pt-4 space-y-4">
-            <Button href="/signup" variant="primary" fullWidth>
-              Sign Up
-            </Button>
-            <Button href="/login" variant="secondary" fullWidth>
-              Log In
-            </Button>
           </div>
         </div>
       </div>
