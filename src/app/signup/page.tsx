@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { SignupFormData, FormErrors } from "@/types/auth";
@@ -12,6 +13,7 @@ import {
 } from "@/lib/validation";
 
 export default function SignupPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState<SignupFormData>({
     email: "",
     password: "",
@@ -71,13 +73,14 @@ export default function SignupPage() {
     });
     if (!res.ok) {
       alert(res.statusText);
-
+      setIsSubmitting(false);
       return null;
     }
     const response = await res.json();
-    alert("user registered!");
-
     console.log(response);
+
+    // Redirect to email confirmation page
+    router.push("/email-confirmation");
   };
 
   return (
