@@ -88,9 +88,11 @@ export default function SignupPage() {
     });
 
     if (signInResponse?.ok) {
-      router.push("/");
+      router.push("/email-unverified");
     } else {
-      alert("Signup successful but login failed. Please try logging in manually.");
+      alert(
+        "Signup successful but login failed. Please try logging in manually."
+      );
       router.push("/login");
     }
 
