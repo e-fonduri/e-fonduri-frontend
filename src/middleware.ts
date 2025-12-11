@@ -29,11 +29,22 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ token, req }) => {
+        // Allow unauthenticated access to login, signup, and home pages
+        if (
+          req.nextUrl.pathname === "/login" ||
+          req.nextUrl.pathname === "/signup" ||
+          req.nextUrl.pathname === "/"
+        ) {
+          return true;
+        }
+        // Require authentication for other routes
+        return !!token;
+      },
     },
   }
 );
 
 export const config = {
-  matcher: ["/dashboard(.*)", "/email-unverified", "/login", "/signup"],
+  matcher: ["/dashboard(.*)", "/email-unverified", "/login", "/signup", "/"],
 };
