@@ -3,6 +3,8 @@ import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 async function refreshToken(token: JWT): Promise<JWT> {
+  console.log("🔄 Starting token refresh...");
+
   const res = await fetch("http://localhost:3001/users/refresh", {
     method: "POST",
     headers: {
@@ -11,12 +13,13 @@ async function refreshToken(token: JWT): Promise<JWT> {
   });
 
   if (!res.ok) {
-    console.log("Refresh token expired or invalid - logging out");
+    const errorText = await res.text();
+    console.error("❌ Refresh failed:", res.status, errorText);
     throw new Error("Refresh token expired or invalid");
   }
 
-  console.log("refreshed");
   const response = await res.json();
+  console.log("✅ Token refreshed successfully");
 
   return { ...token, backendToken: response };
 }
@@ -54,11 +57,56 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
 
+  pages: {
+    signIn: "/login",
+  },
+
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) return { ...token, ...user };
 
-      if (new Date().getTime() < token.backendToken.expiresIn - 60000)
+      // Handle manual session updates (from email-unverified page polling)
+      if (trigger === "update") {
+        const accessToken = token.backendToken?.accessToken;
+
+        if (!accessToken) {
+          console.error("❌ No access token found in token");
+          return { ...token, error: "No access token found" } as JWT;
+        }
+
+        try {
+          const response = await fetch("http://localhost:3001/users/me", {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!response.ok) {
+            console.error("❌ Failed to fetch user data:", response.status);
+            return token; // Return existing token on error
+          }
+
+          const userData = await response.json();
+
+          // Backend might return array or single object
+          const user = Array.isArray(userData) ? userData[0] : userData;
+
+          console.log("✅ User data updated:", user?.accountStatus);
+          token.user = user;
+
+          return token;
+        } catch (error) {
+          console.error("❌ Error updating user data:", error);
+          return token; // Return existing token on error
+        }
+      }
+
+      // Safety check: if no backendToken, return as-is
+      if (!token.backendToken?.expiresIn) return token;
+
+      if (new Date().getTime() < token.backendToken.expiresIn - 5000)
         return token;
 
       try {

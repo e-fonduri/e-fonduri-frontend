@@ -8,6 +8,7 @@ declare module "next-auth" {
       last_name: string;
       email: string;
       role: string;
+      accountStatus: string;
       created_chatbots: [];
       preferences: {};
       createdAt: string;
@@ -32,6 +33,7 @@ declare module "next-auth/jwt" {
       last_name: string;
       email: string;
       role: string;
+      accountStatus: string;
       created_chatbots: [];
       preferences: {};
       createdAt: string;

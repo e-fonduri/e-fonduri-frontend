@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 
 const SignInButton = () => {
@@ -11,12 +11,12 @@ const SignInButton = () => {
     return (
       <div className="flex gap-4 ml-auto">
         <p className="text-sky-600">{session.user.email}</p>
-        <Link
-          href={"/api/auth/signout"}
-          className="flex gap-4 ml-auto text-red-600"
+        <button
+          onClick={() => signOut({ callbackUrl: "/" })}
+          className="flex gap-4 ml-auto text-red-600 hover:cursor-pointer"
         >
           Sign out
-        </Link>
+        </button>
       </div>
     );
 

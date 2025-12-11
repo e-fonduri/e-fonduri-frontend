@@ -2,6 +2,8 @@
 
 import { useState, FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { SignupFormData, FormErrors } from "@/types/auth";
@@ -12,6 +14,7 @@ import {
 } from "@/lib/validation";
 
 export default function SignupPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState<SignupFormData>({
     email: "",
     password: "",
@@ -71,13 +74,29 @@ export default function SignupPage() {
     });
     if (!res.ok) {
       alert(res.statusText);
-
+      setIsSubmitting(false);
       return null;
     }
     const response = await res.json();
-    alert("user registered!");
-
     console.log(response);
+
+    // Automatically log in the user after successful signup
+    const signInResponse = await signIn("credentials", {
+      email: formData.email,
+      password: formData.password,
+      redirect: false,
+    });
+
+    if (signInResponse?.ok) {
+      router.push("/email-unverified");
+    } else {
+      alert(
+        "Signup successful but login failed. Please try logging in manually."
+      );
+      router.push("/login");
+    }
+
+    setIsSubmitting(false);
   };
 
   return (
