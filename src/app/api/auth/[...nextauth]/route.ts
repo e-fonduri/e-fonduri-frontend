@@ -62,8 +62,49 @@ export const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) return { ...token, ...user };
+
+      // Handle manual session updates (from email-unverified page polling)
+      if (trigger === "update") {
+        const accessToken = token.backendToken?.accessToken;
+
+        if (!accessToken) {
+          console.error("❌ No access token found in token");
+          return { ...token, error: "No access token found" } as JWT;
+        }
+
+        try {
+          const response = await fetch("http://localhost:3001/users/me", {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!response.ok) {
+            console.error("❌ Failed to fetch user data:", response.status);
+            return token; // Return existing token on error
+          }
+
+          const userData = await response.json();
+
+          // Backend might return array or single object
+          const user = Array.isArray(userData) ? userData[0] : userData;
+
+          console.log("✅ User data updated:", user?.accountStatus);
+          token.user = user;
+
+          return token;
+        } catch (error) {
+          console.error("❌ Error updating user data:", error);
+          return token; // Return existing token on error
+        }
+      }
+
+      // Safety check: if no backendToken, return as-is
+      if (!token.backendToken?.expiresIn) return token;
 
       if (new Date().getTime() < token.backendToken.expiresIn - 5000)
         return token;
