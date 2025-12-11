@@ -3,6 +3,8 @@ import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 async function refreshToken(token: JWT): Promise<JWT> {
+  console.log("🔄 Starting token refresh...");
+
   const res = await fetch("http://localhost:3001/users/refresh", {
     method: "POST",
     headers: {
@@ -11,12 +13,13 @@ async function refreshToken(token: JWT): Promise<JWT> {
   });
 
   if (!res.ok) {
-    console.log("Refresh token expired or invalid - logging out");
+    const errorText = await res.text();
+    console.error("❌ Refresh failed:", res.status, errorText);
     throw new Error("Refresh token expired or invalid");
   }
 
-  console.log("refreshed");
   const response = await res.json();
+  console.log("✅ Token refreshed successfully");
 
   return { ...token, backendToken: response };
 }
@@ -62,7 +65,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) return { ...token, ...user };
 
-      if (new Date().getTime() < token.backendToken.expiresIn - 60000)
+      if (new Date().getTime() < token.backendToken.expiresIn - 5000)
         return token;
 
       try {

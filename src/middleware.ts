@@ -24,6 +24,13 @@ export default withAuth(
       return NextResponse.redirect(new URL("/email-unverified", req.url));
     }
 
+    if (token?.user?.accountStatus === "verified") {
+      // Allow access to email-unverified page
+      if (req.nextUrl.pathname === "/email-unverified") {
+        return NextResponse.redirect(new URL("/", req.url));
+      }
+    }
+
     // If account is verified or user is not on a protected route, continue
     return NextResponse.next();
   },

@@ -10,7 +10,7 @@ const Providers = ({ children }: Props) => {
   return (
     <SessionProvider
       refetchInterval={180} // Refetch session every 3 minutes
-      refetchOnWindowFocus={true} // Refetch when window regains focus
+      refetchOnWindowFocus={false} // Refetch when window regains focus
     >
       {children}
     </SessionProvider>
