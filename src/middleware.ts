@@ -5,7 +5,11 @@ export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
 
-    if (token) {
+    // Check if token exists and doesn't have an error flag
+    // Note: We don't check expiresIn here because the JWT callback handles refresh
+    const hasValidToken = token && !token.error;
+
+    if (hasValidToken) {
       if (
         req.nextUrl.pathname === "/login" ||
         req.nextUrl.pathname === "/signup"
@@ -15,7 +19,7 @@ export default withAuth(
     }
 
     // If user is authenticated and account is unverified
-    if (token?.user?.accountStatus === "unverified") {
+    if (hasValidToken && token?.user?.accountStatus === "unverified") {
       // Allow access to email-unverified page
       if (req.nextUrl.pathname === "/email-unverified") {
         return NextResponse.next();
@@ -24,7 +28,7 @@ export default withAuth(
       return NextResponse.redirect(new URL("/email-unverified", req.url));
     }
 
-    if (token?.user?.accountStatus === "verified") {
+    if (hasValidToken && token?.user?.accountStatus === "verified") {
       // Allow access to email-unverified page
       if (req.nextUrl.pathname === "/email-unverified") {
         return NextResponse.redirect(new URL("/", req.url));
@@ -46,7 +50,8 @@ export default withAuth(
           return true;
         }
         // Require authentication for other routes
-        return !!token;
+        // Check token exists and no error flag
+        return !!token && !token.error;
       },
     },
   }
