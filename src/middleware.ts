@@ -39,19 +39,24 @@ export default withAuth(
     return NextResponse.next();
   },
   {
+    pages: {
+      signIn: "/login",
+    },
     callbacks: {
       authorized: ({ token, req }) => {
-        // Allow unauthenticated access to login, signup, and home pages
-        if (
-          req.nextUrl.pathname === "/login" ||
-          req.nextUrl.pathname === "/signup" ||
-          req.nextUrl.pathname === "/"
-        ) {
-          return true;
+        const publicRoutes = ["/login", "/signup", "/"];
+        if (publicRoutes.includes(req.nextUrl.pathname)) return true;
+
+        if (!token) return false;
+        if (token.error) return false;
+
+        // Check if token is expired
+        const expiresIn = (token as any).backendToken?.expiresIn;
+        if (expiresIn && new Date().getTime() >= expiresIn) {
+          return false;
         }
-        // Require authentication for other routes
-        // Check token exists and no error flag
-        return !!token && !token.error;
+
+        return true;
       },
     },
   }
